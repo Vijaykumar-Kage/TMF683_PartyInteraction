@@ -1,0 +1,405 @@
+{
+  "basePath": "/userInteractions/v1",
+  "definitions": {
+    "UserInteractionRequestType": {
+      "properties": {
+        "@type": {
+          "description": "Type of interaction. E.g: phone call, sms, store, kiosk, mobile app, chat...",
+          "type": "string"
+        },
+        "interactionDate": {
+          "description": "Time interval when the interaction took place",
+          "$ref": "#/definitions/TimePeriodType"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human readable summary of the interaction"
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PartyRefType"
+          },
+          "description": "Parties related with the interaction e.g.: agents, users, customers, etc"
+        },
+        "relatedObject": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ObjectRefType"
+          },
+          "description": "Entities related with the interaction e.g.: orders, products, tickets, sites, etc"
+        },
+        "reason": {
+          "description": "Reason why the interaction took place. E.g: looking for information of a product, service complaint, etc.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the interaction. E.g.: scheduled, finished",
+          "type": "string"
+        },
+        "originator": {
+          "description": "Who started the interaction, the user proactively going to a store or calling our call center, or the company sending a promotion SMS, calling him or sending him a letter with the bill",
+          "type": "string",
+          "enum": [
+            "user",
+            "company"
+          ]
+        },
+        "channel": {
+          "description": "channel where the interaction took place",
+          "$ref": "#/definitions/ChannelRefType"
+        }
+      },
+      "required": [
+        "interactionDate"
+      ]
+    },
+    "UserInteractionType": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "unique identifier of the user interaction"
+            },
+            "href": {
+              "type": "string",
+              "description": "URI where to query and perform operations on the interaction"
+            }
+          },
+          "required": [
+            "id",
+            "href"
+          ]
+        },
+        {
+          "$ref": "#/definitions/UserInteractionRequestType"
+        }
+      ]
+    },
+    "ChannelRefType": {
+      "description": "Reference to a channel that can be queried with an API call.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the channel"
+        },
+        "href": {
+          "type": "string",
+          "description": "URI where to query or perform actions on the channel"
+        },
+        "name": {
+          "type": "string",
+          "description": "Screen name of the channel"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the channel"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "PartyRefType": {
+      "description": "Reference to an external party that can be tipically queried with another API",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the party"
+        },
+        "href": {
+          "type": "string",
+          "description": "URI where to query or perform actions on the party"
+        },
+        "@referredType": {
+          "type": "string",
+          "description": "Type of party (e.g.: user, customer, agent, etc.)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Screen name of the party"
+        }
+      },
+      "required": [
+        "id",
+        "@referredType"
+      ]
+    },
+    "ObjectRefType": {
+      "description": "Reference to an external entity that can be tipically queried with another API such as a customer account, a ticket, etc.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "URI where to query or perform actions on the entity"
+        },
+        "@referredType": {
+          "type": "string",
+          "description": "Type of entity (e.g.: account, ticket, etc.)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Screen name of the entity"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the entity"
+        }
+      },
+      "required": [
+        "id",
+        "@referredType"
+      ]
+    },
+    "TimePeriodType": {
+      "properties": {
+        "startDateTime": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDateTime": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "startDateTime"
+      ]
+    }
+  },
+  "host": "unicaapis.telefonica.com",
+  "info": {
+    "description": "The user interactions management TMF Open API is intented to be used to create or retrieve information about when, how and why any user has interacted with a company.",
+    "title": "User Interaction Management",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/userInteraction": {
+      "post": {
+        "operationId": "createUserInteraction",
+        "parameters": [
+          {
+            "description": "Data for the user interaction creation",
+            "in": "body",
+            "name": "userInteractionRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserInteractionRequestType"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "User interaction created successfully",
+            "schema": {
+              "$ref": "#/definitions/UserInteractionType"
+            },
+            "headers": {
+              "Location": {
+                "description": "Location where to query the created user interaction",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "summary": "Create a new user interaction",
+        "tags": [
+          "User interactions"
+        ]
+      },
+      "get": {
+        "operationId": "retrieveUserInteractions",
+        "parameters": [
+          {
+            "description": "To retrieve interactions related with a specific account",
+            "in": "query",
+            "name": "accountId",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To retrieve interactions related with a specific customer",
+            "in": "query",
+            "name": "customerId",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions that happened after this value",
+            "format": "date-time",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions that happened before this value",
+            "format": "date-time",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions in a specific channel",
+            "in": "query",
+            "name": "channel.id",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions in a specific channel",
+            "in": "query",
+            "name": "channel.name",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions with a specific status",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions with a specific subStatus",
+            "in": "query",
+            "name": "subStatus",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To obtain interactions of a specific type",
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To limit the amount of results",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "To get the results starting from an offset value. Use for pagination",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User interactions retrieved successfully",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/UserInteractionType"
+              },
+              "type": "array"
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "summary": "Retrieve a list of user interactions",
+        "tags": [
+          "User interactions"
+        ]
+      }
+    },
+    "/userInteraction/{userInteractionId}": {
+      "get": {
+        "operationId": "retrieveUserInteraction",
+        "parameters": [
+          {
+            "description": "The id of the user interaction to be fetched",
+            "in": "path",
+            "name": "userInteractionId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User interaction retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/UserInteractionType"
+            }
+          }
+        },
+        "summary": "Retrieve a user interaction",
+        "tags": [
+          "User interactions"
+        ]
+      }
+    },
+    "/userInteraction/{userInteractionId}/status": {
+      "put": {
+        "operationId": "modifyUserInteractionStatus",
+        "parameters": [
+          {
+            "description": "The id of the user interaction to be fetched",
+            "in": "path",
+            "name": "userInteractionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "New value for the status field",
+            "in": "body",
+            "name": "userInteractionStatusRequest",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User interaction status modified successfully",
+            "schema": {
+              "$ref": "#/definitions/UserInteractionType"
+            }
+          }
+        },
+        "summary": "Modify user interaction status",
+        "tags": [
+          "User interactions"
+        ]
+      }
+    }
+  },
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "User interactions"
+    }
+  ]
+}
